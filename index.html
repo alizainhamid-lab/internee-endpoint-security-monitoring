@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Internee.pk SOC & EDR Monitoring Dashboard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0b1120; color: #e2e8f0; margin: 0; padding: 24px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 { color: #38bdf8; margin-bottom: 4px; }
+    .sub { color: #94a3b8; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .card h3 { margin: 0 0 8px; font-size: 13px; color: #94a3b8; text-transform: uppercase; }
+    .card .val { font-size: 28px; font-weight: bold; }
+    .crit { color: #f87171; } .high { color: #fb923c; } .med { color: #facc15; } .ok { color: #4ade80; }
+    .controls { margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+    button { background: #0284c7; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    button:hover { background: #0369a1; }
+    button.sec { background: #334155; }
+    table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+    th { background: #0f172a; color: #94a3b8; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    .b-CRITICAL { background: #7f1d1d; color: #fecaca; }
+    .b-HIGH { background: #7c2d12; color: #fed7aa; }
+    .b-MEDIUM { background: #713f12; color: #fef08a; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛡️ Endpoint Security & SOC Monitoring Console</h1>
+    <div class="sub">Internee.pk Internship Task • FIM + Sysmon Telemetry + MalwareBazaar IOCs + Automated Escalation • Built by Ali Zain Hamed</div>
+
+    <div class="grid">
+      <div class="card"><h3>Total Alerts</h3><div class="val" id="totalCount">7</div></div>
+      <div class="card"><h3>Critical (IOC Match)</h3><div class="val crit" id="critCount">1</div></div>
+      <div class="card"><h3>High Severity</h3><div class="val high" id="highCount">4</div></div>
+      <div class="card"><h3>Auto-Escalated</h3><div class="val ok" id="escCount">5</div></div>
+    </div>
+
+    <div class="controls">
+      <button onclick="simulateEvent('MALWARE')">+ Simulate MalwareBazaar IOC Hit</button>
+      <button onclick="simulateEvent('FIM')">+ Simulate FIM File Tamper</button>
+      <button class="sec" onclick="filterSev('ALL')">Show All</button>
+      <button class="sec" onclick="filterSev('CRITICAL')">Critical Only</button>
+      <button class="sec" onclick="filterSev('HIGH')">High Only</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Category</th>
+          <th>Source</th>
+          <th>Details</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="alertBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const alerts = [
+      { sev: "CRITICAL", cat: "MALWAREBAZAAR_IOC_MATCH", src: "Sysmon + ThreatIntel", details: "SHA-256 matched TestDropper.LabIOC on WKSTN-FIN-01", status: "ESCALATED" },
+      { sev: "HIGH", cat: "FIM_MODIFIED", src: "FIM Engine", details: "Unauthorized modification detected in monitored_dir/config.conf", status: "ESCALATED" },
+      { sev: "HIGH", cat: "SYSMON_SUSPICIOUS_PROCESS", src: "Sysmon Event ID 1", details: "WINWORD.EXE spawned encoded PowerShell payload", status: "ESCALATED" },
+      { sev: "HIGH", cat: "SYSMON_C2_NETWORK", src: "Sysmon Event ID 3", details: "Outbound connection to 185.220.101.45:4444 (SRV-APP-02)", status: "ESCALATED" },
+      { sev: "HIGH", cat: "USER_BRUTEFORCE_ANOMALY", src: "Auth Telemetry", details: "7 failed login attempts for user admin_ops", status: "ESCALATED" },
+      { sev: "MEDIUM", cat: "FIM_NEW_FILE", src: "FIM Engine", details: "New executable dropped: monitored_dir/dropper.exe", status: "LOGGED" },
+      { sev: "MEDIUM", cat: "USER_OFFHOURS_PRIV_ESC", src: "Auth Telemetry", details: "Sudo privilege escalation at 02:00 UTC on SRV-APP-02", status: "LOGGED" }
+    ];
+
+    let currentFilter = "ALL";
+
+    function render() {
+      const tbody = document.getElementById("alertBody");
+      const filtered = currentFilter === "ALL" ? alerts : alerts.filter(a => a.sev === currentFilter);
+      tbody.innerHTML = filtered.map(a => `
+        <tr>
+          <td><span class="badge b-${a.sev}">${a.sev}</span></td>
+          <td><strong>${a.cat}</strong></td>
+          <td>${a.src}</td>
+          <td>${a.details}</td>
+          <td>${a.status}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("totalCount").textContent = alerts.length;
+      document.getElementById("critCount").textContent = alerts.filter(a => a.sev === "CRITICAL").length;
+      document.getElementById("highCount").textContent = alerts.filter(a => a.sev === "HIGH").length;
+      document.getElementById("escCount").textContent = alerts.filter(a => a.status === "ESCALATED").length;
+    }
+
+    function filterSev(sev) { currentFilter = sev; render(); }
+
+    function simulateEvent(type) {
+      if (type === "MALWARE") {
+        alerts.unshift({ sev: "CRITICAL", cat: "MALWAREBAZAAR_IOC_MATCH", src: "Live Simulation", details: "Malicious hash detected & quarantined in real time", status: "ESCALATED" });
+      } else {
+        alerts.unshift({ sev: "HIGH", cat: "FIM_MODIFIED", src: "Live Simulation", details: "Critical system config hash mismatch triggered alert", status: "ESCALATED" });
+      }
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
