@@ -1,0 +1,5 @@
+Internee.pk Security & Monitoring Task - Summary
+Total Alerts: 7 | Escalated (HIGH/CRITICAL): 5
+By Severity: HIGH=4, MEDIUM=2, CRITICAL=1
+By Category: FIM_MODIFIED=1, FIM_NEW_FILE=1, MALWAREBAZAAR_IOC_MATCH=1, SYSMON_SUSPICIOUS_PROCESS=1, SYSMON_C2_NETWORK=1, USER_BRUTEFORCE_ANOMALY=1, USER_OFFHOURS_PRIV_ESC=1
+Controls Active: File Integrity Monitoring (FIM), Sysmon Telemetry Correlation, User Anomaly Detection, MalwareBazaar IOC Matching, Automated Alert Escalation.

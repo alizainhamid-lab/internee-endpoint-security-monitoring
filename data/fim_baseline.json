@@ -1,0 +1,12 @@
+{
+  "/home/alizain/internee-soc-edr/monitored_dir/config.conf": {
+    "sha256": "c44b31fd0be0705638582cf4f1d0c0f93d7f5554cacb3154def5facb7eda8ad9",
+    "size": 46,
+    "mtime": 1794800327.596
+  },
+  "/home/alizain/internee-soc-edr/monitored_dir/dropper.exe": {
+    "sha256": "2e315b3f49d6675c54d2ec897e5971361ce82cf28cb3debca3a88d848aaa9d08",
+    "size": 19,
+    "mtime": 1794800327.596
+  }
+}
